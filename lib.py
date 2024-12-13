@@ -175,3 +175,82 @@ def pretty_print(metric, metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einste
 def calculate_print(metric, coords):
     metric_inv, Gamma, Riemann, Ricci, Ricci_curvature, Einstein = calculate_tensors(metric, coords)
     pretty_print(metric, metric_inv, Gamma, Riemann, Ricci, Ricci_curvature, Einstein)
+
+def plt_tensor(tensor, name, symbol):
+    latex_string = f'{name}:\n'
+    if isinstance(tensor, sp.MutableDenseNDimArray):
+        shape = tensor.shape
+        is_zero = True
+
+        for indices in itertools.product(*[range(s) for s in shape]):
+            value = tensor[indices]
+            if value != 0:
+                is_zero = False
+                latex_string += r"\begin{equation*}" + '\n' + '\t'
+                latex_string += f"{symbol}{indices} = {sp.latex(value)}" + '\n'
+                latex_string += r"\end{equation*}" + '\n'
+
+        if is_zero:
+            latex_string += f"{symbol} is zero everywhere."
+    
+    elif isinstance(tensor, sp.Matrix):
+        is_zero = True
+        rows, cols = tensor.shape
+
+        for i in range(rows):
+            for j in range(cols):
+                value = tensor[i, j]
+                if value != 0:
+                    is_zero = False
+                    latex_string += r"\begin{equation*}" + '\n' + '\t'
+                    latex_string += f"{symbol}({i}, {j}) = {sp.latex(value)}" + '\n'
+                    latex_string += r"\end{equation*}" + '\n'
+
+        if is_zero:
+            latex_string += f"{symbol} is zero everywhere."
+    
+    elif isinstance(tensor, sp.Basic):
+        latex_string += r"\begin{equation*}" + '\n' + '\t'
+        latex_string += f"{symbol} = {sp.latex(tensor)}" + '\n'
+        latex_string += r"\end{equation*}" + '\n'
+
+    else:
+        latex_string += f"Unsupported tensor type: {type(tensor)}"
+
+    latex_string += '\n'
+    return latex_string
+
+def pretty_print(metric, metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einstein):
+    print_tensor(metric, 'Metric Tensor (g_ij)', 'g')
+    print_tensor(metric_inv, 'Inverse Metric Tensor (g^ij)', 'g')
+    print_tensor(Gamma, 'Christoffel Symbols (Γ^k_ij)', 'Γ')
+    print_tensor(Riemann, 'Riemann Tensor (R^l_kij)', 'R')
+    print_tensor(Ricci, 'Ricci Tensor (R_ij)', 'R')
+    print_tensor(Ricci_scalar, 'Ricci Scalar (R)', 'R')
+    print_tensor(Einstein, 'Einstein Tensor (G_ij)', 'G')
+
+def pretty_plt(metric, metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einstein):
+    latex_string = r"\documentclass{article}" + '\n'
+    latex_string += r"\usepackage[fleqn]{amsmath}" + '\n'
+    latex_string += r"\usepackage{geometry}" + '\n'
+    latex_string += r"\pagenumbering{gobble}" + '\n'
+    latex_string += '\t' + r"\geometry{" + '\n'
+    latex_string += '\t' + r"left=10mm," + '\n'
+    latex_string += '\t' + r"top=10mm," + '\n'
+    latex_string += '\t' + r"}" + '\n'
+    latex_string += r"\begin{document}" + '\n'
+
+    latex_string += plt_tensor(metric, 'Metric Tensor', 'g')
+    latex_string += plt_tensor(metric_inv, 'Inverse Metric Tensor', 'g')
+    latex_string += plt_tensor(Gamma, 'Christoffel Symbols', r'\Gamma')
+    latex_string += plt_tensor(Riemann, 'Riemann Tensor', 'R')
+    latex_string += plt_tensor(Ricci, 'Ricci Tensor', 'R')
+    latex_string += plt_tensor(Ricci_scalar, 'Ricci Scalar', 'R')
+    latex_string += plt_tensor(Einstein, 'Einstein Tensor', 'G')
+
+    latex_string += r"\end{document}"
+    print(latex_string)
+
+    tex_filename = "output.tex"
+    with open(tex_filename, 'w') as file:
+        file.write(latex_string)
