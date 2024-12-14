@@ -2,30 +2,31 @@ import sympy as sp
 import lib
 
 #  Needed symbols
-t, r, m, theta, phi = sp.symbols('t r m theta phi')
+t, r, theta, phi, m = sp.symbols('t r theta phi m')
 coords = [t, r, theta, phi]
+
+m = sp.symbols('m')
+V = sp.Function('V')(r)
+U = sp.Function('U')(r)
 
 # Metric tensor
 metric = sp.Matrix([
-    [-(1-2*m/r), 0, 0, 0],
-    [0, (1-2*m/r)**(-1), 0, 0],
-    [0, 0, r**2, 0],
-    [0, 0, 0, r**2 * sp.sin(theta)**2]
+    [U, 0, 0, 0],
+    [0, -V, 0, 0],
+    [0, 0, -r**2, 0],
+    [0, 0, 0, -r**2 * sp.sin(theta)**2]
 ])
 
 metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einstein = lib.calculate_tensors(metric, coords)
 lib.pretty_print(metric, metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einstein)
 
-# Manually went and proved that G_00 simplifies to 0
-
 # equations = []
 # n = len(coords)
 # for i in range(n):
 #     for j in range(n):
-#         Einstein_component = Einstein[i, j]
-#         
-#         equations.append(sp.Eq(Einstein_component, 0))
+#         if Einstein[i, j] != 0:
+#             Einstein_component = Einstein[i, j]
+#             equations.append(sp.Eq(Einstein_component, 0))
 #
 # solution = sp.solve(equations)
-#
 # print(solution)

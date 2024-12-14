@@ -126,7 +126,7 @@ def calculate_tensors(metric, coords):
 
     return metric_inv, Gamma, Riemann, Ricci, Ricci_scalar, Einstein
 
-def print_tensor(tensor, name, symbol):
+def print_tensor(tensor, name, symbol, latex = False):
     print(f'{name}:')
     if isinstance(tensor, sp.MutableDenseNDimArray):
         shape = tensor.shape
@@ -136,7 +136,10 @@ def print_tensor(tensor, name, symbol):
             value = tensor[indices]
             if value != 0:
                 is_zero = False
-                print(f"{symbol}{indices} = {value}")
+                if not latex:
+                    print(f"{symbol}{indices} = {value}")
+                else:
+                    print(f"{symbol}{indices} = {sp.latex(value)}")
 
         if is_zero:
             print(f"{symbol} is zero everywhere.")
@@ -150,13 +153,19 @@ def print_tensor(tensor, name, symbol):
                 value = tensor[i, j]
                 if value != 0:
                     is_zero = False
-                    print(f"{symbol}({i}, {j}) = {value}")
+                    if not latex:
+                        print(f"{symbol}({i}, {j}) = {value}")
+                    else:
+                        print(f"{symbol}({i}, {j}) = {sp.latex(value)}")
 
         if is_zero:
             print(f"{symbol} is zero everywhere.")
     
     elif isinstance(tensor, sp.Basic):
-        print(f"{symbol} = {tensor}")
+        if not latex:
+            print(f"{symbol} = {tensor}")
+        else:
+            print(f"{symbol} = {sp.latex(tensor)}")
 
     else:
         print(f"Unsupported tensor type: {type(tensor)}")
